@@ -1,3 +1,4 @@
+from django.utils import timezone
 import uuid
 import pyotp
 from django.db import models
@@ -11,11 +12,13 @@ class Client(models.Model):
     )
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    developer_app = models.ForeignKey(DeveloperApp, on_delete=models.CASCADE, related_name="clients")
+    developer_app = models.ForeignKey(
+        DeveloperApp, on_delete=models.CASCADE, related_name="clients")
 
     # This links to developer's own user ID
     external_user_id = models.CharField(max_length=255)
-
+    email = models.EmailField(null=True, blank=True)
+    
     mfa_type = models.CharField(max_length=10, choices=MFA_TYPES)
     is_active = models.BooleanField(default=True)
 
@@ -26,7 +29,8 @@ class Client(models.Model):
 
 
 class TOTPDevice(models.Model):
-    client = models.OneToOneField(Client, on_delete=models.CASCADE, related_name="totp_device")
+    client = models.OneToOneField(
+        Client, on_delete=models.CASCADE, related_name="totp_device")
     secret_key = models.CharField(max_length=32)  # Base32 secret
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -39,13 +43,15 @@ class TOTPDevice(models.Model):
 
 
 class EmailOTP(models.Model):
-    client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name="email_otps")
+    client = models.ForeignKey(
+        Client, on_delete=models.CASCADE, related_name="email_otps")
 
     email = models.EmailField()
-    otp_code = models.CharField(max_length=6)
+    otp_hash = models.CharField(max_length=128)
     expires_at = models.DateTimeField()
+    is_used = models.BooleanField(default=False)
 
     created_at = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
-        return f"Email OTP for {self.email}"
+    def is_expired(self):
+        return timezone.now() > self.expires_at

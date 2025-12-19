@@ -83,6 +83,44 @@ class TOTPSetupView(APIView):
         }, status=status.HTTP_201_CREATED)
 
 
+class TOTPVerifyView(APIView):
+    permission_classes = [AppSecretKeyPermission]
+
+    def post(self, request):
+        developer_app = request.developer_app
+        external_user_id = request.data.get("external_user_id")
+        otp_code = request.data.get("otp")
+
+        if not external_user_id or not otp_code:
+            return Response(
+                {"error": "external_user_id and otp_code are required"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Retrieve client
+        try:
+            client = Client.objects.get(
+                developer_app=developer_app,
+                external_user_id=external_user_id,
+                mfa_type="totp",
+                is_active=True
+            )
+        except Client.DoesNotExist:
+            return Response({"error": "TOTP not setup for this user"}, status=404)
+
+        # Ensure client has a TOTP device
+        if not hasattr(client, "totp_device"):
+            return Response({"error": "TOTP device not found"}, status=404)
+
+        totp = pyotp.TOTP(client.totp_device.secret_key)
+
+        # Verify code with ±1 time step window for clock drift
+        if totp.verify(otp_code, valid_window=1):
+            return Response({"success": True, "verified": True}, status=status.HTTP_200_OK)
+        else:
+            return Response({"success": False, "verified": False, "error": "Invalid TOTP code"}, status=status.HTTP_400_BAD_REQUEST)
+
+
 class EmailMFASetupView(APIView):
     permission_classes = [AppSecretKeyPermission]
 

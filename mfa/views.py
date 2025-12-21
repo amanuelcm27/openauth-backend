@@ -79,7 +79,8 @@ class TOTPSetupView(APIView):
         return Response({
             "success": True,
             "secret_key": secret,
-            "qr_code_base64": qr_base64
+            "qr_code_base64": qr_base64,
+            "otpauth_url": otpauth_url
         }, status=status.HTTP_201_CREATED)
 
 

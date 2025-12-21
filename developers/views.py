@@ -25,6 +25,7 @@ class DeveloperAPIKeyPermission(BasePermission):
     def has_permission(self, request, view):
         key = request.headers.get("X-Developer-Key")
         if not key:
+            print("DEBUG HEADER:", request.headers)
             return False
         try:
             developer = Developer.objects.get(developer_api_key=key)

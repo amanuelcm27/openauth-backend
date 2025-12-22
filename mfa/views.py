@@ -242,3 +242,26 @@ class EmailOTPVerifyView(APIView):
             "success": True,
             "verified": True
         })
+
+
+class MFAStatusView(APIView):
+    permission_classes = [AppSecretKeyPermission]
+
+    def get(self, request):
+        developer_app = request.developer_app
+        external_user_id = request.data.get("external_user_id")
+
+        if not external_user_id:
+            return Response({"error": "external_user_id required"}, status=400)
+
+        try:
+            client = Client.objects.get(
+                developer_app=developer_app,
+                external_user_id=external_user_id
+            )
+            return Response({
+                "mfa_type": client.mfa_type,
+                "is_active": client.is_active
+            })
+        except Client.DoesNotExist:
+            return Response({"error": "Client not found"}, status=404)

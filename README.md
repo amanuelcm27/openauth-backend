@@ -47,6 +47,7 @@ Instead, they use:
 
 ## 🔗 Related Repositories
 
+* **frontend sdk and cli client** : https://github.com/amanuelcm27/openauth-frontend/
 * **Frontend SDK**
 
   * ``` npm install @openauthdev/sdk ```

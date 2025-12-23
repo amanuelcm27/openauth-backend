@@ -218,7 +218,7 @@ Each MFA method typically includes:
 * Expiry & replay protection
 * Tests
 
-See `CONTRIBUTING.md` for full guidelines.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for full guidelines.
 
 ---
 
@@ -226,7 +226,7 @@ See `CONTRIBUTING.md` for full guidelines.
 
 We welcome contributions!
 
-Please read **CONTRIBUTING.md** before submitting a pull request.
+Please read [CONTRIBUTING.md](CONTRIBUTING.md) before submitting a pull request.
 
 ### You can contribute:
 
